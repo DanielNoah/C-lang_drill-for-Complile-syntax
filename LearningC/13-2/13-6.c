@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h>Í
 
 /* 값을 복사해서 전달하는 함수 */
 
