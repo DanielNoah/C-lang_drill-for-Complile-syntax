@@ -19,8 +19,8 @@ void input_nums(int *lotto_nums)
 	int dup;				// 위치 반복문 시작 전! (but,flag 변수 선언 후, 활용을 못함.)
 
 	for(i = 0; i < 6; i++)		//	>전체 흐름<
-	{							//  Flag(상태) 변수를 통해서 먼저 중복인 상태를 default로 해서 빠져나가서, 중복 조건문(if~else)를 통해 분기
-		printf("번호 입력 :\n");
+	{							//  Flag(상태) 변수를 통해 비교연산(==)하여 중복인 상태(dup=1)를 default로 해서 빠져나간(break)
+		printf("번호 입력 :\n");	// 이후, 조건문( if / else )를 통해 분기
 		scanf("%d", &num);
 	
 		dup = 0;				// 상태 변수 초기화 해야함.(기본 값 0(false))
@@ -38,10 +38,10 @@ void input_nums(int *lotto_nums)
 		{
 			lotto_nums[i] = num;			
 		}
-		else
+		else						// else -> 중복일 경우
 		{
 			printf( "같은 번호가 있습니다!");
-			i--;						// num의 값을 로또번호 배열에 대입시킨 후, 한 번 ㅐ 로또 번호(num) 입력시키기 위해 제어변수 i 감소 연산
+			i--;						//  로또 번호(num)를 재입력시키기 위해 제어변수 i 1 감소시킴		
 		}
 	}
 }		
