@@ -1,0 +1,19 @@
+#include <stdio.h>
+	
+int main(void)
+{
+	char num[5][5] = {0};
+
+	int i, j;
+	for(i = 0; i < 5; i++)
+	{
+		for(j = 0; j < 5; j++)
+		{
+			if(i == j) num[i][j] = 'X';
+				printf("%5c", num[i][j]);
+		}
+		printf("\n");
+	}
+
+	return 0;
+}
