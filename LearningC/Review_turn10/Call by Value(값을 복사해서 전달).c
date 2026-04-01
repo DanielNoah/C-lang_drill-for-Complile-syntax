@@ -10,7 +10,7 @@ int main()
 	printf("Callee의 return값 : %d\n", a);
 
 	a = add_ten(a); // 기존의 변수 a에 반환된 a값 덮어쓰기
-	printf("Callee의 return값(을 저장한 변수 출력) : %d\n", a);
+	printf("Callee의 return값(을 저장한 변숫값 출력) : %d\n", a);
 
 	return 0;
 }
