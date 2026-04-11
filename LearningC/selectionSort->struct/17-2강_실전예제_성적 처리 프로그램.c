@@ -47,7 +47,6 @@ void input_data(ReportScore *prs)
 		scanf("%d %d %d", &prs->kor, &prs->eng, &prs->math);
 		prs++;
 	}
-
 }
 
 void calc_data(ReportScore *prs)
@@ -81,7 +80,7 @@ void sort_data(ReportScore *prs){
 		{									// * 앞(i) < 뒤(j) 대소 비교 시퀀스 *
 			if (prs[max].tot < prs[j].tot) // 그런데, j 인덱스를 가지는 배열요소의 총점이 오히려 더 크면 
 			{
-				max = j;			// 가장 max(큰 값 인덱스)에 j(두 번째 배열 인데스) 대입
+				max = j;			// 가장 max(큰 값 인덱스)에 j(두 번째 배열 인덱스) 대입
 			}
 		}							// * 선택 정렬 시퀀스 * //
 		if (max != i)				// 가장 큰 배열 요소의 인덱스가 i가 아니면,	
@@ -96,7 +95,6 @@ void sort_data(ReportScore *prs){
 void print_data(ReportScore *prs)
 {
 	int i;
-%
 	for (i = 0; i < 5; i++)
 	{
 		printf("%5d %7s %5d %5d %5d %5d %7.1lf %5c\n", 
