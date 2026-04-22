@@ -1,6 +1,6 @@
 # eBPF-DSA Security Monitoring Framework
 
-Real-time security monitoring architecture combining eBPF kernel observability and Data Structures & Algorithms (DSA) for scalable threat detection.
+Real-time security monitoring architecture combining eBPF kernel observability and Hashmaps, Sliding Windows (DSA, Data Structure Algorithm), Stur for scalable threat detection.
 
 
 # Overview
