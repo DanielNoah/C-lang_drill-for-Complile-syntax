@@ -18,12 +18,12 @@ def handle_event(cpu, data, size):
     
 #     window = [t for t in sessions[pid] if ts - t < 10]
 #     if len(window) >= 5:
-#         print(f"!반복 연결 탐지: PID={pid}, Count={len(window)}")
+#         print(f"!repeated connection detection: PID={pid}, Count={len(window)}")
 
     WINDOW = 10  # 10초 내 5회 시도 시 경고
     sessions[pid] = [t for t in sessions[pid] if ts - t < WINDOW]
     if len(sessions[pid]) > 5:
-        print(f"[ALERT] Suspicious activity from PID {pid}") # Sliding Windows 확장(자료구조 초기화)
+        print(f"!! Detect duplicate connections {pid}") # Sliding Windows 확장(자료구조 초기화)
 b["events"].open_perf_buffer(handle_event) 
 
 while True:
