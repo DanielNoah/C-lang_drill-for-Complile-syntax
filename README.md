@@ -31,10 +31,9 @@ Unlike traditional security systems that rely on static logs or rule-based detec
 </p>
 
 > [!WARNING]
-> Urgent info that needs immediate user attention to avoid problems.
+> Critical content demanding immediate user attention due to potential risks.
 <br />
-[Contribution
-guidelines for this project](https://dev.to/younggi/ebpf-dsa-security-monitoring-framework-5gin)
+[Contribution guidelines for this project](https://dev.to/younggi/ebpf-dsa-security-monitoring-framework-5gin)
 
 
 
