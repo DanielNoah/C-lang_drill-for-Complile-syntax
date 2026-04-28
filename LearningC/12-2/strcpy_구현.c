@@ -41,7 +41,7 @@ void myStrcpy(char* pa, char* pb)
 
 }
 
-/* strcat 실제 내부구조 */
+/* strcpy 실제 내부구조 */
 char* internal_strcpy(char *pd, char *ps)	// 복사 받을 곳(pd)과 복사할 곳(ps)의 포인터
 {
 	char *po = pd; 	// pd 값을 나중에 반환하기 위해 보관
