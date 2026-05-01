@@ -2,7 +2,7 @@
 
 Real-time security monitoring architecture combining eBPF kernel observability and Hashmaps, Sliding Windows (DSA, Data Structure Algorithms), Stur for scalable threat detection.
 
-refactor(security): correct buffer handling explanations and improve observability design comments
+Refactor(security): correct buffer handling explanations and improve observability design comments.
 
 - fix misconceptions around strcpy, strncpy, and buffer overflow
 - refine eBPF event pipeline explanation
@@ -16,8 +16,7 @@ This project presents a next-generation security monitoring framework designed f
 <br />
 # The architecture integrates:
 
-eBPF (Extended Berkeley Packet Filter) for kernel-level telemetry collection
-DSA for scalable and deterministic analysis
+eBPF (Extended Berkeley Packet Filter) for kernel-level telemetry collection DSA for scalable and deterministic analysis.
 
 Unlike traditional security systems that rely on static logs or rule-based detection, this framework transforms security into a data-driven, algorithmic problem.
 <br />
