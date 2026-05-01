@@ -148,7 +148,7 @@ Unlike traditional security systems that rely on static logs or rule-based detec
 <br />
 
 ## Demo (ARM64 Ubuntu VM)
-<p align="center"> <img width="2833" height="758" src="https://github.com/user-attachments/assets/0dbaf1b3-8655-40df-a97e-1de01b5b88ba" /> </p>
+<p align="center"> <img width="1139" height="793" alt="eBPF perf bufferring sub system detection logs" src="https://github.com/user-attachments/assets/a0152656-6fff-484c-a162-58817ff7a8c8" /> </p>
 
 > [!WARNING]
 > Designed with an adversarial mindset: not just detecting attacks, but understanding how detection fails.
