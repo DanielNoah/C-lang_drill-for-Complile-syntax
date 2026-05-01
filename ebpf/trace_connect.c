@@ -1,26 +1,135 @@
-/* eBPF 설계
-   실시간 connect() 호출 감지 및 사용자 공간으로 이벤트 전송 */
+/* eBPF Design
+ *
+ * We are not building a full network monitor.
+ * We are extracting just enough signal from connect() to detect abnormal behavior early.
+ *
+ * Kernel space collects facts. User space decides meaning.
+ */
 
-#include <uapi/linux/ptrace.h> // 레지스터 정보를 담고 있는 pt_regs 구조체를 사용하기 위해 커널 헤더 가져옴. 
-BPF_PERF_OUTPUT(events); // 커널에서 수집한 데이터를 사용자 공간으로 쏘아 올린 Perf Ring Buffer의 이름을 events로 지정하여 생성
+#include <uapi/linux/ptrace.h>  
+// We depend on pt_regs because kprobes expose raw register state.
+// This is a low-level contract—fragile across architectures, but powerful.
 
-/* 구조체 정의(Data Design) */
-struct data_t { // 추적할 정보를 담을 구조체 생성
-    u32 pid;    // pid(프로세스 id) 멤버(부호없는 8byte) 선언
-    u64 ts;     // ts(Time Stamp) 선언 -> 이벤트가 발생한 시점의 시간
+
+BPF_PERF_OUTPUT(events);  
+// This is our only exit path to user space.
+// Keep it simple: push raw events, avoid complex logic in kernel.
+// If you over-engineer here, debugging becomes painful fast.
+
+
+/* Data Design
+ *
+ * Minimalism is intentional.
+ * Every extra field increases overhead and reduces portability.
+ */
+struct data_t {
+    u32 pid;   // We only keep what we can act on quickly.
+               // PID is enough for coarse-grained anomaly detection.
+
+    u64 ts;    // Time is context.
+               // Without time, behavior is just noise.
 };
 
-/* 추적 함수(Trace_connect) */
+
+/* Trace Function
+ *
+ * This runs in kernel context—treat it as a constrained environment:
+ * - no loops (or very limited)
+ * - no heavy memory usage
+ * - no assumptions about safety
+ */
 int trace_connect(struct pt_regs *ctx) {
-    struct data_t evt = {};                 // 데이터 초기화
-    evt.pid = bpf_get_current_pid_tgid();   // PID 획득, 호출 함수는 상위 32비트에 TGID(프로세스 ID), 하위 32비트에 PID(스레드 ID)를 반환하는데, 이를 evt.pid에 대입하여 현재 프로세스 ID만 추출
-    evt.ts  = bpf_ktime_get_ns();           // 시간 기록, 호출 함수를 통해 부팅 이후 흐른 시간을 나노초(ns) 단위로 가져와 저장
-    events.perf_submit(ctx, &evt, sizeof(evt)); // 해당 함수를 호출하여 앞서 정의한 events 통로를 통해 수집된 데이터를 사용자 공간의 모니터링 프로그램을 즉시 전송
-    return 0;   // 커널에 제어권을 돌려줌 (시스템 호출 후 사용자 모드 복귀)
+
+    struct data_t evt = {};  
+    // Always initialize.
+    // Kernel bugs are not forgiving.
+
+    evt.pid = bpf_get_current_pid_tgid();  
+    // This returns both TGID and PID.
+    // We intentionally accept ambiguity here—precision can be handled later in user space.
+
+    evt.ts  = bpf_ktime_get_ns();  
+    // Use monotonic time.
+    // Wall-clock time introduces drift and inconsistency.
+
+    events.perf_submit(ctx, &evt, sizeof(evt));  
+    // Ship the event immediately.
+    // Do not batch here—latency matters more than throughput at this stage.
+
+    return 0;  
+    // Always return cleanly.
+    // You are a guest in the kernel—leave no side effects.
 }
 
-// 커널 이벤트 캡처 (eBPF Instrumentation): eBPF 프로그램을 이용해 
-// 커널 수준에서 봇 관련 이벤트(예: 네트워크 연결, 인증 호출 등)를 실시간으로 가로챔. 
-// 예를 들어, `tracepoint:syscalls:sys_enter_connect`나 `kprobe/tcp_connect`를 
-// 걸어 봇 서버로의 연결 시도를 모니터링하고, `BPF_PERF_OUTPUT`을 통해 사용자 공간으로 이벤트를 전송함. 
-// 커널 내부의 `BPF_HASH` 맵을 사용하여 PID별 세션 정보를 저장하거나, 인증 시도 횟수를 누적할 수 있음.
+
+/* Instrumentation Strategy
+ *
+ * Hook selection is a design decision:
+ *
+ * - tracepoint:syscalls:sys_enter_connect → stable, lower risk
+ * - kprobe/tcp_connect                  → deeper visibility, more fragile
+ *
+ * Choose stability first, depth later.
+ *
+ * We are not trying to see everything.
+ * We are trying to see enough to act.
+ */
+
+
+/* State Handling (Optional)
+ *
+ * Kernel maps (e.g., BPF_HASH) can store state,
+ * but this is a trade-off:
+ *
+ * - Pros: fast, in-kernel correlation
+ * - Cons: harder to debug, limited complexity
+ *
+ * Default rule:
+ * Keep state in user space unless latency forces you otherwise.
+ */
+
+
+/* Design Philosophy
+ *
+ * eBPF is for observation, not intelligence.
+ *
+ * Let the kernel:
+ *   - capture events
+ *   - timestamp them
+ *
+ * Let user space:
+ *   - correlate events
+ *   - detect anomalies
+ *   - make decisions
+ *
+ * Mixing these concerns leads to brittle systems.
+ */
+
+
+/* Scaling Considerations
+ *
+ * This design will break under:
+ * - extremely high connection rates
+ * - slow user-space consumers
+ *
+ * When that happens:
+ * - switch to ring buffer (BPF_RINGBUF_OUTPUT)
+ * - introduce sampling
+ * - or move partial aggregation into kernel maps
+ *
+ * Do not optimize before you see dropped events.
+ */
+
+
+/* What This Detects Well
+ *
+ * - burst connection attempts (possible scanning / DDoS precursors)
+ * - runaway processes making repeated connections
+ *
+ * What it does NOT detect:
+ * - low-and-slow attacks
+ * - protocol-level anomalies
+ *
+ * That’s fine.
+ * This is an early-warning system, not a full IDS.
+ */
