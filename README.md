@@ -156,6 +156,7 @@ Unlike traditional security systems that rely on static logs or rule-based detec
 > Designed with an adversarial mindset: not just detecting attacks, but understanding how detection fails.
 <br />
 🔗 Contribution
-
+<br />
+https://medium.com/@gonoah8/why-understanding-memory-internals-became-essential-for-proactive-linux-defense-22f6ccff109e
 
 
